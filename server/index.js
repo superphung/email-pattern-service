@@ -4,11 +4,14 @@ import mail from './email'
 import mongoose from 'mongoose'
 import * as db from './models'
 import amqp from 'amqplib/callback_api'
+import cors from 'cors'
 
 const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost/patterndb'
 const AMQP_URL = process.env.AMQP_URL || 'amqp://localhost'
 
 mongoose.connect(MONGO_URL)
+
+app.use(cors())
 
 amqp.connect(AMQP_URL, function (err, conn) {
   if (err) {
