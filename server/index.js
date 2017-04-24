@@ -5,9 +5,10 @@ import mongoose from 'mongoose'
 import * as db from './models'
 import amqp from 'amqplib/callback_api'
 import cors from 'cors'
+import fillPattern from './fillPattern'
 
-const MONGO_URL = process.env.MONGO_URL || 'mongodb://localhost/patterndb'
-const AMQP_URL = process.env.AMQP_URL || 'amqp://localhost'
+const MONGO_URL = process.env.MONGO_URL || 'mongodb://mongo/patterndb'
+const AMQP_URL = process.env.AMQP_URL || 'amqp://rabbit'
 
 mongoose.connect(MONGO_URL)
 
@@ -31,13 +32,13 @@ amqp.connect(AMQP_URL, function (err, conn) {
       console.log('receive', msg.content.toString())
       const patterns = JSON.parse(msg.content.toString())
       for (let obj of patterns) {
-        const {company, city, pattern} = obj
-        const found = await db.Pattern.findOne({company, city, pattern})
+        const {company, city, pattern, domain} = obj
+        const found = await db.Pattern.findOne({company, city, pattern, domain})
         if (found) {
           found.count += 1
           await found.save()
         } else {
-          await db.Pattern.create({company, city, pattern})
+          await db.Pattern.create({company, city, pattern, domain})
         }
       }
     }, {noAck: true})
@@ -60,6 +61,31 @@ app.post('/emailToPattern', (req, res) => {
       return Object.assign(user, { pattern: mail.EmailToPattern(fname, lname, email, company) })
     })
   res.status(200).json({patterns})
+})
+
+app.post('/guess', async (req, res) => {
+  const {users} = req.body
+  if (!users) {
+    return res.status(400).send('missing params')
+  }
+  const mails = await Promise.all(
+    users
+      .filter(user => user && user.fname && user.lname && user.company)
+      .map(async user => {
+        const {fname, lname, company} = user
+        if (company.includes('@')) {
+          console.log('email')
+          const [at, right] = company.split('@')
+          const patterns = await db.Pattern.find({ domain: { '$regex': right, '$options': 'i' }})
+          return Object.assign(user, {mails: fillPattern(fname, lname, patterns)});
+        }
+        console.log('no email')
+        const patterns = await db.Pattern.find({ company: { '$regex': company, '$options': 'i' }})
+        console.log('patterns', patterns);
+        return Object.assign(user, {mails: fillPattern(fname, lname, patterns)});
+      })
+  )
+  res.status(200).json({ mails })
 })
 
 app.listen(3000)

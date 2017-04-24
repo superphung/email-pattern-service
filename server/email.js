@@ -19,7 +19,8 @@
  ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
 
 module.exports = {
-  EmailToPattern
+  EmailToPattern,
+  RemoveDiacritics
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2087,7 +2088,7 @@ function EmailToPattern(fname, lname, email, company, checkOption) {
 
 
 
-/*
+/*@todo
 
   // Look for Shorthen First Name by First Initial. Compact form  (Jean-Pierre --> jpierre)
   if (!PatternIsFound(res)) {
@@ -2278,9 +2279,12 @@ function ValidateEmail(email) {
 Validations externes:
 pour noms composés, vérifier LinkedIn et/ou Google (florence "carron cabaret" disneyland linkedin -top)
 tester SMTP
-
+1) smtp
+2) si smtp false -> plusieur pattern diff, / par le nombre de pattern
+3) google -> nom prenom "@mail.com"
 
 */
+
 
 }
 

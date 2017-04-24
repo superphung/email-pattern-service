@@ -4,20 +4,23 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "nodemon index.js",
     "lint": "standard",
-    "precommit": "npm run lint",
-    "commit": "git cz"
+    "commit": "git cz",
+    "test": "ava"
   },
   "keywords": [],
   "author": "Phung Eric <superphung44@gmail.com>",
   "license": "MIT",
   "devDependencies": {
+    "ava": "0.19.0",
     "babel-polyfill": "6.23.0",
     "babel-preset-es2015": "6.22.0",
     "babel-preset-stage-3": "6.22.0",
     "babel-register": "6.23.0",
     "commitizen": "2.9.5",
     "cz-conventional-changelog": "1.2.0",
+    "nodemon": "1.11.0",
     "standard": "8.6.0"
   },
   "config": {
@@ -35,6 +38,12 @@
   "standard": {
     "ignore": [
       "server/email.js"
+    ]
+  },
+  "ava": {
+    "require": [
+      "babel-register",
+      "babel-polyfill"
     ]
   }
 }
